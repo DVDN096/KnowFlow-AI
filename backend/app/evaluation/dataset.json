@@ -1,0 +1,26 @@
+[
+  {
+    "question": "What is the primary objective of object detection?",
+    "relevant_chunk_ids": [131]
+  },
+  {
+    "question": "What are the input and output of an object detection system?",
+    "relevant_chunk_ids": [130]
+  },
+  {
+    "question": "How does YOLO perform object detection?",
+    "relevant_chunk_ids": [134, 142, 143]
+  },
+  {
+    "question": "What was the motivation for replacing VGG with ResNet in SSD?",
+    "relevant_chunk_ids": [138]
+  },
+  {
+    "question": "What problem does Faster R-CNN address compared with Fast R-CNN?",
+    "relevant_chunk_ids": [142]
+  },
+  {
+    "question": "How does YOLO divide an image and predict bounding boxes?",
+    "relevant_chunk_ids": [134, 143]
+  }
+]
