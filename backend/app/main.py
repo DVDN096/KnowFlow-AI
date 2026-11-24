@@ -13,6 +13,7 @@ app = FastAPI(
 
 
 # CORS configuration for React frontend
+# CORS configuration for React frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -20,12 +21,12 @@ app.add_middleware(
         "http://127.0.0.1:5173",
         "http://localhost:4173",
         "http://127.0.0.1:4173",
+        "https://know-flow-ai.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # API routes
 app.include_router(
