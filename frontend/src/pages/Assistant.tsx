@@ -1,5 +1,8 @@
 
 import { useState, type FormEvent } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 import {
   Send,
   Bot,
@@ -25,6 +28,14 @@ interface Message {
   content: string;
   sources?: AskResponse["sources"];
   timings?: AskResponse["timings"];
+}
+
+// Clean escaped Markdown returned by the LLM.
+function normalizeMarkdown(content: string): string {
+  return content
+    .replace(/\\([\\`*_{}\[\]()#+\-.!>])/g, "$1")
+    .replace(/&#x20;/gi, " ")
+    .replace(/&nbsp;/gi, " ");
 }
 
 export default function Assistant() {
@@ -134,6 +145,7 @@ export default function Assistant() {
               <p className="text-sm font-semibold text-slate-900">
                 KnowFlow Intelligence
               </p>
+
               <p className="flex items-center gap-1.5 text-xs text-emerald-600">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 RAG-powered assistant
@@ -143,6 +155,7 @@ export default function Assistant() {
 
           <div className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
             <Settings2 size={15} className="text-slate-500" />
+
             <label htmlFor="top-k" className="text-xs text-slate-500">
               Retrieval depth
             </label>
@@ -238,9 +251,118 @@ export default function Assistant() {
                         : "border border-slate-200 bg-white text-slate-700 shadow-sm"
                     }`}
                   >
-                    <p className="whitespace-pre-wrap">{message.content}</p>
+                    {message.role === "user" ? (
+                      <p className="whitespace-pre-wrap">
+                        {message.content}
+                      </p>
+                    ) : (
+                      <div className="break-words">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            h1: ({ children }) => (
+                              <h1 className="mb-3 mt-5 text-xl font-bold text-slate-900 first:mt-0">
+                                {children}
+                              </h1>
+                            ),
+                            h2: ({ children }) => (
+                              <h2 className="mb-2 mt-5 text-lg font-bold text-slate-900">
+                                {children}
+                              </h2>
+                            ),
+                            h3: ({ children }) => (
+                              <h3 className="mb-2 mt-4 text-base font-semibold text-slate-900">
+                                {children}
+                              </h3>
+                            ),
+                            p: ({ children }) => (
+                              <p className="mb-3 last:mb-0">
+                                {children}
+                              </p>
+                            ),
+                            ul: ({ children }) => (
+                              <ul className="mb-3 ml-5 list-disc space-y-1">
+                                {children}
+                              </ul>
+                            ),
+                            ol: ({ children }) => (
+                              <ol className="mb-3 ml-5 list-decimal space-y-1">
+                                {children}
+                              </ol>
+                            ),
+                            li: ({ children }) => (
+                              <li className="pl-1">
+                                {children}
+                              </li>
+                            ),
+                            strong: ({ children }) => (
+                              <strong className="font-bold text-slate-900">
+                                {children}
+                              </strong>
+                            ),
+                            em: ({ children }) => (
+                              <em className="italic">
+                                {children}
+                              </em>
+                            ),
+                            blockquote: ({ children }) => (
+                              <blockquote className="my-3 border-l-4 border-violet-300 pl-4 italic text-slate-600">
+                                {children}
+                              </blockquote>
+                            ),
+                            code: ({ children, className }) => (
+                              <code
+                                className={`rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[0.9em] text-violet-700 ${
+                                  className ?? ""
+                                }`}
+                              >
+                                {children}
+                              </code>
+                            ),
+                            pre: ({ children }) => (
+                              <pre className="my-3 overflow-x-auto rounded-xl bg-slate-900 p-4 text-xs leading-6 text-slate-100">
+                                {children}
+                              </pre>
+                            ),
+                            a: ({ children, href }) => (
+                              <a
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-violet-700 underline underline-offset-2 hover:text-violet-900"
+                              >
+                                {children}
+                              </a>
+                            ),
+                            hr: () => (
+                              <hr className="my-4 border-slate-200" />
+                            ),
+                            table: ({ children }) => (
+                              <div className="my-3 overflow-x-auto">
+                                <table className="w-full border-collapse text-left text-sm">
+                                  {children}
+                                </table>
+                              </div>
+                            ),
+                            th: ({ children }) => (
+                              <th className="border border-slate-200 bg-slate-50 px-3 py-2 font-semibold text-slate-900">
+                                {children}
+                              </th>
+                            ),
+                            td: ({ children }) => (
+                              <td className="border border-slate-200 px-3 py-2">
+                                {children}
+                              </td>
+                            ),
+                          }}
+                        >
+                          {normalizeMarkdown(message.content)}
+                        </ReactMarkdown>
+                      </div>
+                    )}
                   </div>
 
+                  {/* Retrieved sources */}
                   {message.role === "assistant" &&
                     message.sources &&
                     message.sources.length > 0 && (
@@ -276,6 +398,7 @@ export default function Assistant() {
                       </div>
                     )}
 
+                  {/* Performance metrics */}
                   {message.timings && (
                     <div className="mt-3 flex flex-wrap gap-3 text-xs text-slate-400">
                       <span className="flex items-center gap-1">
@@ -295,6 +418,7 @@ export default function Assistant() {
             ))
           )}
 
+          {/* Loading indicator */}
           {loading && (
             <div className="flex gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
